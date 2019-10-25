@@ -14,3 +14,33 @@ OpenJDK 64-Bit Server VM (build 25.222-b10, mixed mode)
 3) Mysql
 mysql -V
 mysql  Ver 14.14 Distrib 5.6.33, for debian-linux-gnu (x86_64) using  EditLine wrapper
+
+
+Cassandra table creation:
+
+ create TABLE agtstats (starttime timestamp,endtime timestamp ,cpuusage double ,freememory double ,totalmemory double ,usedmemory double ,freestorage double,totalstorage double, Primary key ((totalstorage),starttime,endtime)) WITH CLUSTERING ORDER BY (starttime  DESC );
+MySQL table & trigger creation:
+
+  CREATE TABLE osstats(  
+  CpuUsage DOUBLE NOT NULL ,
+  FreeeMemory DOUBLE NOT NULL ,
+  TotalMemory DOUBLE NOT NULL ,
+  UsedMemory DOUBLE NOT NULL ,
+  FreeStorage DOUBLE NOT NULL ,
+  TotalStorage DOUBLE NOT NULL ,
+  timer TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  primary key(timer)
+     );
+     
+  delimiter //
+  CREATE TRIGGER timesetter
+  BEFORE INSERT ON osstats FOR EACH ROW
+  BEGIN
+  IF (NEW.timer IS NULL) THEN
+  SET NEW.timer = now();END IF;
+  END;//
+  delimiter ;
+     
+To Collect the resources and push to cassandra and mysql:
+
+  Run "Collect_Store_status.java"
